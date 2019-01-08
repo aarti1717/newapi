@@ -1,0 +1,695 @@
+Description: >
+
+    This is an ECS service for node application that connects to Dynamo DB. 
+
+
+
+Parameters: 
+
+
+
+    VPC:
+
+        Description: The VPC that the ECS cluster is deployed to
+
+        Type: AWS::EC2::VPC::Id
+        
+        Default: 'vpc-02267fbf8b2ec8e30'
+        
+        
+    Cluster:
+    
+        Description: Please provide the ECS Cluster ID that this service should run on
+        
+        Type: String
+        
+        Default: 'RDE-EC2-CLS-DEV'    
+        
+
+    ServiceName:
+
+        Description: Please provide the Service name 
+
+        Type: String
+
+        Default: 'rde-api'    
+
+
+
+    DesiredCount: 
+
+        Description: How many instances of this task should we run across our cluster?
+
+        Type: Number
+
+        Default: 1
+
+
+
+    MaxCount:
+
+        Description: Maximum number of instances of this task we can run across our cluster
+
+        Type: Number
+
+        Default: 4
+
+
+
+    Path: 
+
+        Description: The path to register with the Application Load Balancer
+
+        Type: String
+
+        Default: /
+
+
+
+    CloudWatchLogRetention: 
+
+        Description: the number of days the CloudWatch Logs should be retained.
+
+        Type: Number
+
+        Default: 7 
+
+
+
+    Environment: 
+
+        Description: The project environment
+
+        Type: String
+
+        Default: 'DEV' 
+
+
+
+    TableName:
+
+        Description: The Person Plans Table name
+
+        Type: String
+
+        Default: 'alecgo-rde-etl-ddb-Table-3VPDIW38878W'
+
+  
+
+    MappingTableName:
+
+        Description: The SSO Mapping Table Name 
+
+        Type: String
+
+        Default: 'person_lookup'
+
+  
+
+    ApigeePubKey:
+
+        Description: The API Key for extracting JWT 
+
+        Type: String
+
+        Default: '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'
+
+   
+
+    ImageTag:
+
+        Description: The Image Tag to be deployed.  
+
+        Type: String
+
+        Default: '616238a'
+
+
+
+    ECSStackName:
+
+        Type: String
+
+        Default: 'RDE-EC2-CLS-DEV'
+
+
+
+    ListenerCertificateARN:    
+
+       Description: The security certificate ARN 
+
+       Type: String
+
+       Default: 'arn:aws:iam::778784494011:server-certificate/Ret-Digital-DEV-ALB-CER' 
+
+
+
+Conditions:
+
+    CreateHTTPSListener: !Not [ !Equals [ !Ref ListenerCertificateARN, "" ] ]
+
+
+
+Resources:
+
+
+
+    Service: 
+
+        Type: AWS::ECS::Service
+
+        DependsOn: ListenerRule
+
+        Properties:
+
+            Cluster: 
+
+                Fn::ImportValue:
+
+                    !Sub "${ECSStackName}-Cluster"
+
+            Role: !Ref ServiceRole
+
+            DesiredCount: !Ref DesiredCount
+
+            TaskDefinition: !Ref TaskDefinition
+
+            LoadBalancers: 
+
+                - ContainerName: !Sub '${ServiceName}-service'
+
+                  ContainerPort: 3000
+
+                  TargetGroupArn: !Ref TargetGroup
+
+
+
+    TaskDefinition:
+
+        Type: AWS::ECS::TaskDefinition
+
+        Properties:
+
+            Family: !Sub '${ServiceName}-service'
+
+            TaskRoleArn: !GetAtt ServiceRole.Arn
+
+            NetworkMode: 'bridge'
+
+            Cpu: 256
+
+            Memory: 512
+
+            ContainerDefinitions:
+
+                - Name: !Sub '${ServiceName}-service'
+
+                  Essential: true
+
+                  MemoryReservation: 512
+
+                  Cpu: 256
+
+                  Image: !Sub 778784494011.dkr.ecr.${AWS::Region}.amazonaws.com/rde-api:${ImageTag}
+
+                  Memory: 512
+
+                  Environment:
+
+                        - Name: TABLE_NAME
+
+                          Value: !Ref TableName
+
+                        - Name: SSO_MAP_TABLE_NAME
+
+                          Value: !Ref MappingTableName
+
+                        - Name: PUBLIC_KEY
+
+                          Value: !Ref ApigeePubKey
+
+        
+
+                  PortMappings:
+
+                    - ContainerPort: 3000
+
+                  LogConfiguration:
+
+                    LogDriver: awslogs
+
+                    Options:
+
+                        awslogs-region: !Ref AWS::Region
+
+                        awslogs-group: !Ref CloudWatchLogsGroup
+
+                        awslogs-stream-prefix: !Ref AWS::StackName
+
+
+
+    CloudWatchLogsGroup:
+
+        Type: AWS::Logs::LogGroup
+
+        Properties: 
+
+            LogGroupName: !Ref AWS::StackName
+
+            RetentionInDays: !Ref CloudWatchLogRetention
+
+            LogGroupName: !Sub /aws/ecs/${AWS::StackName} 
+
+
+
+    TargetGroup:
+
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+
+        Properties:
+
+            Name: !Sub '${ServiceName}-tg' 
+
+            VpcId: !Ref VPC
+
+            Port: 80
+
+            Protocol: HTTP
+
+            Matcher: 
+
+                HttpCode: 200-299
+
+            HealthCheckIntervalSeconds: 10
+
+            HealthCheckPath: /health
+
+            HealthCheckProtocol: HTTP
+
+            HealthCheckTimeoutSeconds: 5
+
+            HealthyThresholdCount: 2
+
+            TargetGroupAttributes:
+
+                - Key: deregistration_delay.timeout_seconds
+
+                  Value: 30    
+
+    
+
+                
+
+    ListenerRule:
+
+        Type: AWS::ElasticLoadBalancingV2::ListenerRule
+
+        DependsOn : ServiceRole
+
+        Properties:
+
+            ListenerArn: 
+
+                Fn::ImportValue:
+
+                    !Sub "${ECSStackName}-HTTPListener"
+
+            Priority: 1
+
+            Conditions:
+
+                - Field: path-pattern
+
+                  Values: 
+
+                    - !Ref Path
+
+            Actions:
+
+                - TargetGroupArn: !Ref TargetGroup
+
+                  Type: forward
+
+
+
+       
+
+    HTTPSListenerRule:
+
+        Type: AWS::ElasticLoadBalancingV2::ListenerRule
+
+        Properties:
+
+            ListenerArn: 
+
+                Fn::ImportValue:
+
+                    !Sub "${ECSStackName}-HTTPSListener"
+
+            Priority: 1
+
+            Conditions:
+
+                - Field: path-pattern
+
+                  Values: 
+
+                    - !Ref Path
+
+            Actions:
+
+                - TargetGroupArn: !Ref TargetGroup
+
+                  Type: forward              
+
+
+
+    # This IAM Role grants the service access to register/unregister with the 
+
+    # Application Load Balancer (ALB). It is based on the default documented here:
+
+    # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_IAM_role.html
+
+    ServiceRole: 
+
+        Type: AWS::IAM::Role
+
+        Properties:
+
+            RoleName: !Sub ecs-service-${AWS::StackName}
+
+            Path: /
+
+            AssumeRolePolicyDocument: |
+
+                {
+
+                    "Statement": [{
+
+                        "Effect": "Allow",
+
+                        "Principal": { "Service": [ 
+
+                            "ecs.amazonaws.com",
+
+                            "ecs-tasks.amazonaws.com",
+
+                            "ec2.amazonaws.com" ]},
+
+                        "Action": [ "sts:AssumeRole" ]
+
+                    }
+
+                    ]
+
+                }
+
+            Policies:
+
+                - PolicyName: !Sub ecs-service-${AWS::StackName}
+
+                  PolicyDocument:
+
+                    {
+
+                        "Version": "2012-10-17",
+
+                        "Statement": [{
+
+                                "Effect": "Allow",
+
+                                "Action": [
+
+                                    "ec2:AuthorizeSecurityGroupIngress",
+
+                                    "ec2:Describe*",
+
+                                    "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+
+                                    "elasticloadbalancing:Describe*",
+
+                                    "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+
+                                    "elasticloadbalancing:DeregisterTargets",
+
+                                    "elasticloadbalancing:DescribeTargetGroups",
+
+                                    "elasticloadbalancing:DescribeTargetHealth",
+
+                                    "elasticloadbalancing:RegisterTargets",
+
+                                    "logs:CreateLogStream",
+
+                                    "logs:PutLogEvents",
+
+                                    "ecr:*",
+
+
+
+                                ],
+
+                                "Resource": "*"
+
+                        }]
+
+                    }
+
+
+
+    TaskRolePolicies: 
+
+      Type: "AWS::IAM::Policy"
+
+      Properties: 
+
+        PolicyName: "dynamodbaccessfortask"
+
+        PolicyDocument:   
+
+            Version: "2012-10-17"
+
+            Statement: 
+
+            - 
+
+              Sid: ListAndDescribe
+
+              Effect: Allow
+
+              Action:
+
+              - dynamodb:List*
+
+              - dynamodb:DescribeReservedCapacity*
+
+              - dynamodb:DescribeLimits
+
+              - dynamodb:DescribeTimeToLive
+
+              Resource:
+
+              - arn:aws:dynamodb:*:*:*
+
+            - Sid: SpecificTable
+
+              Effect: Allow
+
+              Action:
+
+              - dynamodb:BatchGet*
+
+              - dynamodb:DescribeStream
+
+              - dynamodb:DescribeTable
+
+              - dynamodb:Get*
+
+              - dynamodb:Query
+
+              - dynamodb:Scan
+
+              - dynamodb:BatchWrite*
+
+              - dynamodb:CreateTable
+
+              - dynamodb:Delete*
+
+              - dynamodb:Update*
+
+              - dynamodb:PutItem
+
+              Resource:
+
+              - arn:aws:dynamodb:*:*:*
+
+        Roles: 
+
+            - !Ref ServiceRole
+
+
+
+    ServiceScalableTarget:
+
+        Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+
+        Properties:
+
+            MaxCapacity: !Ref MaxCount
+
+            MinCapacity: !Ref DesiredCount
+
+            ResourceId: !Join
+
+                - /
+
+                - - service
+
+                  - !Ref Cluster
+
+                  - !GetAtt Service.Name
+
+            RoleARN: 
+
+                Fn::ImportValue:
+
+                    !Sub "${ECSStackName}-ECSServiceAutoScalingRole"
+
+            ScalableDimension: ecs:service:DesiredCount
+
+            ServiceNamespace: ecs
+
+
+
+    ServiceScaleOutPolicy:
+
+        Type : "AWS::ApplicationAutoScaling::ScalingPolicy"
+
+        Properties:
+
+            PolicyName: ServiceScaleOutPolicy
+
+            PolicyType: StepScaling
+
+            ScalingTargetId: !Ref ServiceScalableTarget
+
+            StepScalingPolicyConfiguration:
+
+                AdjustmentType: ChangeInCapacity
+
+                Cooldown: 1800
+
+                MetricAggregationType: Average
+
+                StepAdjustments:
+
+                - MetricIntervalLowerBound: 0
+
+                  ScalingAdjustment: 1
+
+
+
+    ServiceScaleInPolicy:
+
+        Type : "AWS::ApplicationAutoScaling::ScalingPolicy"
+
+        Properties:
+
+            PolicyName: ServiceScaleInPolicy
+
+            PolicyType: StepScaling
+
+            ScalingTargetId: !Ref ServiceScalableTarget
+
+            StepScalingPolicyConfiguration:
+
+                AdjustmentType: ChangeInCapacity
+
+                Cooldown: 1800
+
+                MetricAggregationType: Average
+
+                StepAdjustments:
+
+                - MetricIntervalUpperBound: 0
+
+                  ScalingAdjustment: -1
+
+
+
+    CPUScaleOutAlarm:
+
+        Type: AWS::CloudWatch::Alarm
+
+        Properties:
+
+            AlarmName: CPU utilization greater than 90%
+
+            AlarmDescription: Alarm if cpu utilization greater than 90% of reserved cpu
+
+            Namespace: AWS/ECS
+
+            MetricName: CPUUtilization
+
+            Dimensions:
+
+            - Name: ClusterName
+
+              Value: !Ref Cluster
+
+            - Name: ServiceName
+
+              Value: !GetAtt Service.Name
+
+            Statistic: Maximum
+
+            Period: '60'
+
+            EvaluationPeriods: '3'
+
+            Threshold: '90'
+
+            ComparisonOperator: GreaterThanThreshold
+
+            AlarmActions:
+
+            - !Ref ServiceScaleOutPolicy
+
+
+
+    CPUScaleInAlarm:
+
+        Type: AWS::CloudWatch::Alarm
+
+        Properties:
+
+            AlarmName: CPU utilization less than 70%
+
+            AlarmDescription: Alarm if cpu utilization greater than 70% of reserved cpu
+
+            Namespace: AWS/ECS
+
+            MetricName: CPUUtilization
+
+            Dimensions:
+
+            - Name: ClusterName
+
+              Value: !Ref Cluster
+
+            - Name: ServiceName
+
+              Value: !GetAtt Service.Name
+
+            Statistic: Maximum
+
+            Period: '60'
+
+            EvaluationPeriods: '10'
+
+            Threshold: '70'
+
+            ComparisonOperator: LessThanThreshold
+
+            AlarmActions:
+
+            - !Ref ServiceScaleInPolicy
