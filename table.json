@@ -1,0 +1,6 @@
+{
+  "Parameters" : {
+    "DataTableRCU": "2000" ,
+    "MappingTableRCU": "2000"
+  }
+}
