@@ -23,7 +23,7 @@ Parameters:
         
         Type: String
         
-        Default: 'RDE-EC2-CLS-DEV'    
+        Default: 'RDE-API-ECSMasterDEV'    
         
 
     ServiceName:
@@ -116,13 +116,9 @@ Parameters:
 
    
 
-    ImageTag:
-
-        Description: The Image Tag to be deployed.  
+    Image:
 
         Type: String
-
-        Default: '616238a'
 
 
 
@@ -130,7 +126,7 @@ Parameters:
 
         Type: String
 
-        Default: 'RDE-EC2-CLS-DEV'
+        Default: 'RDE-API-ECSMasterDEV'
 
 
 
@@ -210,7 +206,7 @@ Resources:
 
                   Cpu: 256
 
-                  Image: !Sub 778784494011.dkr.ecr.${AWS::Region}.amazonaws.com/rde-api:${ImageTag}
+                  Image: !Ref Image
 
                   Memory: 512
 
@@ -298,8 +294,7 @@ Resources:
 
     
 
-                
-
+              
     ListenerRule:
 
         Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -380,80 +375,37 @@ Resources:
 
             Path: /
 
-            AssumeRolePolicyDocument: |
+            AssumeRolePolicyDocument:
 
-                {
-
-                    "Statement": [{
-
-                        "Effect": "Allow",
-
-                        "Principal": { "Service": [ 
-
-                            "ecs.amazonaws.com",
-
-                            "ecs-tasks.amazonaws.com",
-
-                            "ec2.amazonaws.com" ]},
-
-                        "Action": [ "sts:AssumeRole" ]
-
-                    }
-
-                    ]
-
-                }
-
+              Statement: 
+                  - Effect: Allow
+                    Principal: 
+                      Service: 
+                        - ecs.amazonaws.com
+                        - ecs-tasks.amazonaws.com
+                        - ec2.amazonaws.com
+                    Action: 
+                      - 'sts:AssumeRole'
             Policies:
-
                 - PolicyName: !Sub ecs-service-${AWS::StackName}
-
                   PolicyDocument:
-
-                    {
-
-                        "Version": "2012-10-17",
-
-                        "Statement": [{
-
-                                "Effect": "Allow",
-
-                                "Action": [
-
-                                    "ec2:AuthorizeSecurityGroupIngress",
-
-                                    "ec2:Describe*",
-
-                                    "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-
-                                    "elasticloadbalancing:Describe*",
-
-                                    "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-
-                                    "elasticloadbalancing:DeregisterTargets",
-
-                                    "elasticloadbalancing:DescribeTargetGroups",
-
-                                    "elasticloadbalancing:DescribeTargetHealth",
-
-                                    "elasticloadbalancing:RegisterTargets",
-
-                                    "logs:CreateLogStream",
-
-                                    "logs:PutLogEvents",
-
-                                    "ecr:*",
-
-
-
-                                ],
-
-                                "Resource": "*"
-
-                        }]
-
-                    }
-
+                    Version: "2012-10-17"
+                    Statement: 
+                      - Effect: Allow
+                        Action: 
+                          - 'ec2:AuthorizeSecurityGroupIngress'
+                          - 'ec2:Describe*'
+                          - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
+                          - 'elasticloadbalancing:Describe*'
+                          - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
+                          - 'elasticloadbalancing:DeregisterTargets'
+                          - 'elasticloadbalancing:DescribeTargetGroups'
+                          - 'elasticloadbalancing:DescribeTargetHealth'
+                          - 'elasticloadbalancing:RegisterTargets'
+                          - 'logs:CreateLogStream'
+                          - 'logs:PutLogEvents'
+                          - 'ecr:*'
+                        Resource: '*'
 
 
     TaskRolePolicies: 
