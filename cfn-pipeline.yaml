@@ -181,8 +181,29 @@ Resources:
                 RoleArn: !ImportValue
                   'Fn::Sub': '${department}-${name}-pipelinerole'
                 #RoleArn: !Ref RaniRoles
-                StackName: "RDE-EC2-CLS-DEV"
+                StackName: "RDE-API-Service"
                 OutputFileName: rani_service-out.json
                 TemplateConfiguration: BuildArtifacts::cfn/rani_cfn_service.config_cap.json
                 TemplatePath: Source::cfn/rani_cfn_service.yml
                
+               
+            - Name: "Provision-DDB"
+              RunOrder: 1
+              InputArtifacts:
+                - Name: Source
+              OutputArtifacts:
+                - Name: TestTableArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !ImportValue
+                  'Fn::Sub': '${department}-${name}-pipelinerole'
+                StackName: "RDE-API-DEV-TABLE-TEST"
+                OutputFileName: table-out.json
+                TemplatePath: Source::cfn/cfn_table.yml
+                   
